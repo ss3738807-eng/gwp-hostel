@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>GWP Bokaro - Hostel Leave Management System</title>
+  <style>
+    /* -------------------------------------------------------------
+       CSS RESET & DESIGN SYSTEM (Glassmorphism & Mobile-First)
+    ------------------------------------------------------------- */
+    :root {
+      --bg-dark: #090d16;
+      --card-bg: rgba(22, 28, 48, 0.65);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --card-hover: rgba(30, 41, 71, 0.8);
+      --accent-cyan: #06b6d4;
+      --accent-purple: #8b5cf6;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-stack);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0b0f19 0%, #15102a 50%, #080c14 100%);
+      min-height: 100vh;
+      color: var(--text-main);
+      padding-bottom: 50px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Ambient background glows */
+    body::before, body::after {
+      content: "";
+      position: fixed;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      filter: blur(100px);
+      z-index: -1;
+      opacity: 0.35;
+      pointer-events: none;
+    }
+    body::before {
+      background: var(--accent-purple);
+      top: -60px;
+      left: -60px;
+    }
+    body::after {
+      background: var(--accent-cyan);
+      bottom: -60px;
+      right: -60px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+
+    /* Layout Containers */
+    .app-container {
+      max-width: 540px;
+      margin: 0 auto;
+      padding: 14px;
+    }
+
+    /* Glass Panels */
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      position: relative;
+    }
+
+    /* Header & Navigation Bar */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 99;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-logo-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+    }
+
+    .nav-title h1 {
+      font-size: 0.98rem;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      color: #ffffff;
+    }
+
+    .nav-title p {
+      font-size: 0.72rem;
+      color: var(--accent-cyan);
+      font-weight: 500;
+    }
+
+    .tab-bar {
+      display: flex;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      gap: 4px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 8px 4px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(139, 92, 246, 0.2));
+      color: #fff;
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    /* Typography & Utilities */
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #ffffff;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 9px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .badge-pending {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-amber);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+    .badge-approved {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .badge-rejected {
+      background: rgba(244, 63, 94, 0.15);
+      color: var(--accent-rose);
+      border: 1px solid rgba(244, 63, 94, 0.35);
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .btn:active {
+      transform: scale(0.98);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-cyan), #2563eb);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(6, 182, 212, 0.35);
+    }
+    .btn-purple {
+      background: linear-gradient(135deg, var(--accent-purple), #6366f1);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+    }
+    .btn-success {
+      background: linear-gradient(135deg, var(--accent-emerald), #059669);
+      color: #ffffff;
+    }
+    .btn-danger {
+      background: linear-gradient(135deg, var(--accent-rose), #e11d48);
+      color: #ffffff;
+    }
+    .btn-outline {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+    }
+    .btn-sm {
+      padding: 7px 12px;
+      font-size: 0.78rem;
+      border-radius: 8px;
+      width: auto;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-control {
+      width: 100%;
+      background: rgba(10, 15, 29, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 11px 13px;
+      color: #ffffff;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-control:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
+    }
+    select.form-control {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 16px;
+    }
+    .form-row {
+      display: flex;
+      gap: 10px;
+    }
+    .form-row .form-group {
+      flex: 1;
+    }
+    .checkbox-wrap {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 14px 0;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      cursor: pointer;
+    }
+    .checkbox-wrap input {
+      accent-color: var(--accent-cyan);
+      margin-top: 3px;
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Views control */
+    .view-section {
+      display: none;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+    .view-section.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Notice Board & Rules */
+    .notice-card {
+      border-left: 4px solid var(--accent-amber);
+      background: linear-gradient(90deg, rgba(245, 158, 11, 0.08), rgba(22, 28, 48, 0.6));
+    }
+    .rule-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      font-size: 0.82rem;
+      color: #cbd5e1;
+    }
+    .rule-item:last-child { margin-bottom: 0; }
+    .rule-bullet {
+      color: var(--accent-amber);
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+
+    /* Profile Header */
+    .profile-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(6, 182, 212, 0.15));
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+    .profile-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .profile-info h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .profile-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+    .profile-meta span {
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    /* Leave Request Card in List */
+    .leave-item-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .leave-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .leave-type-tag {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .leave-dates {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin-bottom: 8px;
+    }
+    .leave-meta-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.74rem;
+      color: #94a3b8;
+      border-top: 1px dashed rgba(255,255,255,0.08);
+      padding-top: 8px;
+      margin-top: 8px;
+    }
+
+    /* Warden Desk Metric Cards */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .metric-box {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 12px;
+      text-align: center;
+    }
+    .metric-num {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 2px;
+    }
+    .metric-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* Action bar for phone link */
+    .tel-link {
+      color: var(--accent-cyan);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      background: rgba(6, 182, 212, 0.1);
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(6, 182, 212, 0.25);
+    }
+
+    /* Gate Pass Card / Modal */
+    .gate-pass-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .gate-pass-modal.active {
+      display: flex;
+    }
+    .pass-container {
+      background: #0f172a;
+      border: 2px solid var(--accent-emerald);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 440px;
+      padding: 20px;
+      box-shadow: 0 15px 40px rgba(16, 185, 129, 0.25);
+      position: relative;
+    }
+    .pass-top-stamp {
+      text-align: center;
+      padding-bottom: 12px;
+      border-bottom: 2px dashed rgba(255,255,255,0.15);
+      margin-bottom: 14px;
+    }
+    .pass-inst-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .pass-inst-sub {
+      font-size: 0.72rem;
+      color: var(--accent-emerald);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .pass-seal {
+      margin-top: 14px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--accent-emerald);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      font-size: 0.76rem;
+      color: var(--accent-emerald);
+      font-weight: 700;
+    }
+    .pass-barcode {
+      margin: 12px auto 6px;
+      height: 32px;
+      background: repeating-linear-gradient(
+        90deg,
+        #fff 0px,
+        #fff 2px,
+        transparent 2px,
+        transparent 5px,
+        #fff 5px,
+        #fff 9px
+      );
+      width: 80%;
+      opacity: 0.75;
+      border-radius: 4px;
+    }
+
+    /* Modal Form / Prompt */
+    .action-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .action-modal.active { display: flex; }
+    .modal-box {
+      background: #151c33;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1e293b;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 25px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.15);
+      z-index: 10000;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Print settings for gate pass */
+    @media print {
+      body * { visibility: hidden; }
+      .pass-container, .pass-container * { visibility: visible; }
+      .pass-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        border: 2px solid #000;
+        color: #000;
+        background: #fff;
+      }
+      .pass-hide-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Sticky Navigation -->
+  <header class="top-nav">
+    <div class="nav-brand">
+      <div class="nav-logo-badge">GWP</div>
+      <div class="nav-title">
+        <h1>Govt. Women's Polytechnic Bokaro</h1>
+        <p>Hostel Leave & Outpass Management</p>
+      </div>
+    </div>
+    <nav class="tab-bar">
+      <button class="tab-btn active" id="tab-home" onclick="App.navigate('home')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+        Home
+      </button>
+      <button class="tab-btn" id="tab-student" onclick="App.navigate('student')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        Student Portal
+      </button>
+      <button class="tab-btn" id="tab-warden" onclick="App.navigate('warden')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        Warden Desk
+      </button>
+    </nav>
+  </header>
+
+  <!-- Main Viewports Container -->
+  <main class="app-container">
+
+    <!-- 1. HOME VIEW -->
+    <section id="view-home" class="view-section active">
+      <!-- Notice Board & Gate Timing -->
+      <div class="glass-card notice-card">
+        <div class="section-title" style="color: var(--accent-amber);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          Important Hostel Directives
+        </div>
+        <div class="rule-item">
+          <span class="rule-bullet">&#9679;</span>
+          <div><strong>Strict Gate Closing:</strong> The hostel main gate closes strictly at <strong>07:00 PM</strong>. No late entry permitted without emergency clearance.</div>
+        </div>
+        <div class="rule-item">
+          <span class="rule-bullet">&#9679;</span>
+          <div><strong>Mandatory Parent Consent:</strong> All night outpasses & vacations require registered parent verification via telephonic confirmation.</div>
+        </div>
+        <div class="rule-item">
+          <span class="rule-bullet">&#9679;</span>
+          <div><strong>Digital Gate Pass:</strong> Approved leave passes must be produced at the security gate along with institute Student ID card.</div>
+        </div>
+      </div>
+
+      <!-- Quick Action Portals -->
+      <div class="glass-card">
+        <h2 class="section-title">Quick Access Portals</h2>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px;">Select your designated portal to apply or review leave requests.</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <button class="btn btn-primary" onclick="App.navigate('student')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+            Student Login / Register
+          </button>
+          
+          <button class="btn btn-purple" onclick="App.navigate('warden')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            Warden Control Desk
+          </button>
+        </div>
+      </div>
+
+      <!-- Hostel Overview Stats -->
+      <div class="glass-card">
+        <h3 class="section-title">Hostel Information</h3>
+        <div style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.6;">
+          <p><strong>Campus:</strong> Sector 8, Bokaro Steel City, Jharkhand - 827009</p>
+          <p><strong>Branches:</strong> CSE | Electrical | Mechanical | Civil</p>
+          <p><strong>Warden Contact:</strong> +91 6542-265123 (Office Hours)</p>
+          <p><strong>Emergency Gate Desk:</strong> Ext. 102 (Available 24x7)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. AUTHENTICATION VIEW (Student & Warden) -->
+    <section id="view-auth" class="view-section">
+      <div class="glass-card">
+        <!-- Auth Sub-tabs -->
+        <div class="tab-bar" style="margin-bottom: 16px;">
+          <button class="tab-btn active" id="auth-sub-student-login" onclick="App.switchAuthTab('student-login')">Student Login</button>
+          <button class="tab-btn" id="auth-sub-student-reg" onclick="App.switchAuthTab('student-reg')">New Register</button>
+          <button class="tab-btn" id="auth-sub-warden" onclick="App.switchAuthTab('warden')">Warden Login</button>
+        </div>
+
+        <!-- Student Login Form -->
+        <form id="form-student-login" onsubmit="App.handleStudentLogin(event)">
+          <div class="form-group">
+            <label>Roll Number</label>
+            <input type="text" id="login-roll" class="form-control" placeholder="e.g. 23-CSE-012" required />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="login-pass" class="form-control" placeholder="Enter password" required />
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Sign In to Student Portal</button>
+          <p style="font-size: 0.76rem; color: var(--text-muted); text-align: center; margin-top: 12px;">
+            Demo Student Roll: <strong style="color:var(--accent-cyan);">23-CSE-012</strong> | Pass: <strong style="color:var(--accent-cyan);">student123</strong>
+          </p>
+        </form>
+
+        <!-- Student Registration Form -->
+        <form id="form-student-reg" style="display: none;" onsubmit="App.handleStudentRegister(event)">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="reg-name" class="form-control" placeholder="e.g. Priya Sharma" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Branch</label>
+              <select id="reg-branch" class="form-control" required>
+                <option value="CSE">CSE</option>
+                <option value="EE">Electrical</option>
+                <option value="ME">Mechanical</option>
+                <option value="Civil">Civil</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Semester</label>
+              <select id="reg-sem" class="form-control" required>
+                <option value="1st">1st Sem</option>
+                <option value="2nd">2nd Sem</option>
+                <option value="3rd">3rd Sem</option>
+                <option value="4th">4th Sem</option>
+                <option value="5th">5th Sem</option>
+                <option value="6th">6th Sem</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Roll Number</label>
+              <input type="text" id="reg-roll" class="form-control" placeholder="e.g. 24-CSE-015" required />
+            </div>
+            <div class="form-group">
+              <label>Room No</label>
+              <input type="text" id="reg-room" class="form-control" placeholder="e.g. B-204" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Registration Number</label>
+            <input type="text" id="reg-regno" class="form-control" placeholder="Board Reg No" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Student Mobile</label>
+              <input type="tel" id="reg-smobile" class="form-control" placeholder="10-digit number" pattern="[0-9]{10}" required />
+            </div>
+            <div class="form-group">
+              <label>Parent Mobile</label>
+              <input type="tel" id="reg-pmobile" class="form-control" placeholder="Parent contact" pattern="[0-9]{10}" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Create Password</label>
+            <input type="password" id="reg-pass" class="form-control" placeholder="Min 6 characters" minlength="4" required />
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Register & Open Dashboard</button>
+        </form>
+
+        <!-- Warden Login Form -->
+        <form id="form-warden-login" style="display: none;" onsubmit="App.handleWardenLogin(event)">
+          <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 10px; padding: 10px; margin-bottom: 14px; font-size: 0.78rem; color: #ddd;">
+            Hostel Administration Portal.<br/>Default Username: <strong>warden</strong> & Password: <strong>admin123</strong>
+          </div>
+          <div class="form-group">
+            <label>Warden ID / Username</label>
+            <input type="text" id="warden-user" class="form-control" placeholder="Enter warden username" required />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="warden-pass" class="form-control" placeholder="Enter password" required />
+          </div>
+          <button type="submit" class="btn btn-purple" style="margin-top: 10px;">Sign In to Warden Desk</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 3. STUDENT DASHBOARD VIEW -->
+    <section id="view-student" class="view-section">
+      <!-- Profile Header -->
+      <div class="glass-card profile-card">
+        <div class="profile-avatar" id="stu-avatar">P</div>
+        <div class="profile-info" style="flex: 1;">
+          <h3 id="stu-name">Priya Kumari</h3>
+          <div class="profile-meta">
+            Roll: <span id="stu-roll">23-CSE-012</span> | Room: <span id="stu-room">B-108</span>
+          </div>
+          <div class="profile-meta">
+            Branch: <span id="stu-branch">CSE</span> | Sem: <span id="stu-sem">4th</span>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="App.logout()" title="Logout" style="padding: 6px 10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </button>
+      </div>
+
+      <!-- Apply For Leave Section -->
+      <div class="glass-card">
+        <h3 class="section-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+          Apply for Outpass / Leave
+        </h3>
+
+        <form id="form-apply-leave" onsubmit="App.handleLeaveApply(event)">
+          <div class="form-group">
+            <label>Leave Category</label>
+            <select id="leave-type" class="form-control" required onchange="App.handleLeaveTypeChange()">
+              <option value="Day Outpass">Day Outpass (Local market / Study - Max 4 hrs)</option>
+              <option value="Night Leave">Night Leave (Stay at Home/Local Guardian)</option>
+              <option value="Vacation">Vacation / Semester Break</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Leaving Date & Time</label>
+              <input type="datetime-local" id="leave-from" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label>Expected Return</label>
+              <input type="datetime-local" id="leave-to" class="form-control" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Destination & Address during Leave</label>
+            <input type="text" id="leave-dest" class="form-control" placeholder="e.g. Home, Sector 4, Bokaro / Ranchi" required />
+          </div>
+
+          <div class="form-group">
+            <label>Detailed Reason</label>
+            <textarea id="leave-reason" class="form-control" rows="2" placeholder="Specific reason for outpass..." required></textarea>
+          </div>
+
+          <label class="checkbox-wrap">
+            <input type="checkbox" id="leave-consent" required />
+            <span>I confirm that my parents/guardians are aware and have formally permitted this leave. False claims subject to disciplinary suspension.</span>
+          </label>
+
+          <button type="submit" class="btn btn-primary">Submit Leave Application</button>
+        </form>
+      </div>
+
+      <!-- Application Status & History -->
+      <div class="glass-card">
+        <h3 class="section-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+          My Applications History
+        </h3>
+        <div id="student-leaves-list">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. WARDEN DESK VIEW -->
+    <section id="view-warden" class="view-section">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <div>
+          <h2 style="font-size: 1.15rem; font-weight: 800; color: #fff;">Warden Control Console</h2>
+          <p style="font-size: 0.74rem; color: var(--accent-cyan);">Chief Hostel Administrator</p>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="App.logout()">Logout</button>
+      </div>
+
+      <!-- Metrics -->
+      <div class="metric-grid">
+        <div class="metric-box">
+          <div class="metric-num" id="metric-total-students" style="color: var(--accent-cyan);">0</div>
+          <div class="metric-label">Registered</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-num" id="metric-pending" style="color: var(--accent-amber);">0</div>
+          <div class="metric-label">Pending Review</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-num" id="metric-approved" style="color: var(--accent-emerald);">0</div>
+          <div class="metric-label">Approved</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-num" id="metric-rejected" style="color: var(--accent-rose);">0</div>
+          <div class="metric-label">Rejected</div>
+        </div>
+      </div>
+
+      <!-- Search & Filters -->
+      <div class="glass-card" style="padding: 14px; margin-bottom: 14px;">
+        <div class="form-group" style="margin-bottom: 8px;">
+          <input type="text" id="warden-search" class="form-control" placeholder="Search by Student Name or Roll No..." oninput="App.renderWardenDesk()" />
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom: 0;">
+            <select id="warden-filter-branch" class="form-control" onchange="App.renderWardenDesk()">
+              <option value="ALL">All Branches</option>
+              <option value="CSE">CSE</option>
+              <option value="EE">EE</option>
+              <option value="ME">ME</option>
+              <option value="Civil">Civil</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <select id="warden-filter-status" class="form-control" onchange="App.renderWardenDesk()">
+              <option value="ALL">All Status</option>
+              <option value="Pending" selected>Pending Only</option>
+              <option value="Approved">Approved</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leave Requests List -->
+      <div id="warden-requests-list">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- DIGITAL GATE PASS MODAL -->
+  <div id="modal-gate-pass" class="gate-pass-modal">
+    <div class="pass-container" id="printable-pass">
+      <div class="pass-top-stamp">
+        <div class="pass-inst-title">GOVT. WOMEN'S POLYTECHNIC BOKARO</div>
+        <div class="pass-inst-sub">OFFICIAL HOSTEL DIGITAL GATE PASS</div>
+        <div style="font-size: 0.65rem; color: #94a3b8; margin-top: 3px;">Affiliated to SBTE Jharkhand | Security Gate Exit Token</div>
+      </div>
+
+      <div style="text-align: center; margin-bottom: 12px;">
+        <span class="badge badge-approved" style="font-size: 0.85rem; padding: 4px 14px;">AUTHORISED OUTPASS</span>
+      </div>
+
+      <div style="font-size: 0.82rem; line-height: 1.7; color: #e2e8f0;">
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Pass ID:</span>
+          <strong id="pass-id" style="color: var(--accent-cyan); font-family: monospace;">GWP-PASS-9901</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Student Name:</span>
+          <strong id="pass-student-name">Priya Kumari</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Roll & Room:</span>
+          <span id="pass-roll-room">23-CSE-012 (Room B-108)</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Branch:</span>
+          <span id="pass-branch">Computer Science</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Outpass Type:</span>
+          <strong id="pass-type" style="color:#fff;">Day Outpass</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Departure Time:</span>
+          <span id="pass-dept" style="color: #cbd5e1;">--</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Valid Return Until:</span>
+          <strong id="pass-return" style="color: var(--accent-amber);">--</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Parent Contact:</span>
+          <span id="pass-parent-mob">9876543210</span>
+        </div>
+      </div>
+
+      <div class="pass-barcode"></div>
+
+      <div class="pass-seal">
+        ✓ DIGITAL VERIFIED & STAMPED BY CHIEF HOSTEL WARDEN<br/>
+        <span style="font-size: 0.65rem; opacity: 0.8;">Strict Security Exit Authorization - Hand over back at check-in</span>
+      </div>
+
+      <div class="pass-hide-print" style="margin-top: 16px; display: flex; gap: 8px;">
+        <button class="btn btn-outline" onclick="window.print()">Print / PDF</button>
+        <button class="btn btn-primary" onclick="App.closePassModal()">Close Pass</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WARDEN APPROVAL / REJECTION REMARKS MODAL -->
+  <div id="modal-warden-action" class="action-modal">
+    <div class="modal-box">
+      <h3 id="warden-action-title" style="font-size: 1.05rem; margin-bottom: 10px; color: #fff;">Review Request</h3>
+      <div class="form-group">
+        <label id="warden-action-label">Remarks / Rejection Reason</label>
+        <textarea id="warden-action-remarks" class="form-control" rows="3" placeholder="Enter reason or special instruction..."></textarea>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-outline" onclick="App.closeActionModal()">Cancel</button>
+        <button id="warden-action-confirm-btn" class="btn btn-primary">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- In-app Toast message -->
+  <div id="toast">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+    <span id="toast-msg">Notice</span>
+  </div>
+
+  <!-- -----------------------------------------------------------
+       SAFE STORAGE & COMPLETE APPLICATION JAVASCRIPT LOGIC
+  ------------------------------------------------------------- -->
+  <script>
+    /**
+     * CRITICAL RUNTIME CRASH-PROOF SAFE STORAGE
+     * Overcomes Android WebViewer localStorage bugs and security null exceptions.
+     */
+    const SafeStorage = (function() {
+      const memoryStore = {};
+      let isStorageAvailable = false;
+
+      try {
+        const testKey = '__storage_test__';
+        if (typeof window !== 'undefined' && 'localStorage' in window && window.localStorage !== null) {
+          window.localStorage.setItem(testKey, testKey);
+          window.localStorage.removeItem(testKey);
+          isStorageAvailable = true;
+        }
+      } catch (err) {
+        isStorageAvailable = false;
+      }
+
+      return {
+        getItem: function(key) {
+          try {
+            if (isStorageAvailable) {
+              const val = window.localStorage.getItem(key);
+              if (val !== null) return val;
+            }
+          } catch(e) {}
+          return memoryStore.hasOwnProperty(key) ? memoryStore[key] : null;
+        },
+        setItem: function(key, value) {
+          const strVal = String(value);
+          try {
+            if (isStorageAvailable) {
+              window.localStorage.setItem(key, strVal);
+            }
+          } catch(e) {}
+          memoryStore[key] = strVal;
+        },
+        removeItem: function(key) {
+          try {
+            if (isStorageAvailable) {
+              window.localStorage.removeItem(key);
+            }
+          } catch(e) {}
+          delete memoryStore[key];
+        }
+      };
+    })();
+
+    /**
+     * MAIN APPLICATION CONTROLLER
+     */
+    const App = (function() {
+      // Storage Keys
+      const KEY_STUDENTS = 'gwp_students_data_v2';
+      const KEY_LEAVES = 'gwp_leaves_data_v2';
+      const KEY_SESSION = 'gwp_session_v2';
+
+      // Internal State
+      let students = [];
+      let leaves = [];
+      let currentSession = null; // { role: 'student' | 'warden', user: {...} }
+      let activeWardenAction = null; // { leaveId, type: 'Approve' | 'Reject' }
+
+      // Initial Seeds
+      function initData() {
+        // Load Students
+        const rawStudents = SafeStorage.getItem(KEY_STUDENTS);
+        if (rawStudents) {
+          try { students = JSON.parse(rawStudents) || []; } catch(e) { students = []; }
+        }
+        if (!students || students.length === 0) {
+          students = [
+            {
+              id: 'STU-1001',
+              name: 'Priya Kumari',
+              branch: 'CSE',
+              sem: '4th',
+              roll: '23-CSE-012',
+              regNo: '2301040051',
+              room: 'B-108',
+              smobile: '9876543210',
+              pmobile: '9431102948',
+              pass: 'student123'
+            },
+            {
+              id: 'STU-1002',
+              name: 'Anjali Soren',
+              branch: 'EE',
+              sem: '4th',
+              roll: '23-EE-008',
+              regNo: '2301020019',
+              room: 'A-212',
+              smobile: '9123456780',
+              pmobile: '9835129401',
+              pass: 'anjali123'
+            }
+          ];
+          saveStudents();
+        }
+
+        // Load Leaves
+        const rawLeaves = SafeStorage.getItem(KEY_LEAVES);
+        if (rawLeaves) {
+          try { leaves = JSON.parse(rawLeaves) || []; } catch(e) { leaves = []; }
+        }
+        if (!leaves || leaves.length === 0) {
+          const now = new Date();
+          leaves = [
+            {
+              id: 'GWP-8910',
+              studentId: 'STU-1001',
+              studentName: 'Priya Kumari',
+              roll: '23-CSE-012',
+              branch: 'CSE',
+              room: 'B-108',
+              pmobile: '9431102948',
+              type: 'Day Outpass',
+              from: new Date(now.getTime() + 3600000).toISOString().slice(0, 16),
+              to: new Date(now.getTime() + 14400000).toISOString().slice(0, 16),
+              dest: 'City Centre, Sector 4, Bokaro',
+              reason: 'Purchase technical textbooks and electronics drafting kit.',
+              status: 'Approved',
+              remarks: 'Granted. Strict entry before 6:30 PM.',
+              createdAt: new Date(now.getTime() - 86400000).toISOString()
+            },
+            {
+              id: 'GWP-8911',
+              studentId: 'STU-1002',
+              studentName: 'Anjali Soren',
+              roll: '23-EE-008',
+              branch: 'EE',
+              room: 'A-212',
+              pmobile: '9835129401',
+              type: 'Night Leave',
+              from: new Date(now.getTime() + 86400000).toISOString().slice(0, 16),
+              to: new Date(now.getTime() + 172800000).toISOString().slice(0, 16),
+              dest: 'Home - Chas, Bokaro',
+              reason: 'Sister marriage ceremony invitation.',
+              status: 'Pending',
+              remarks: '',
+              createdAt: new Date().toISOString()
+            }
+          ];
+          saveLeaves();
+        }
+
+        // Load Session
+        const rawSession = SafeStorage.getItem(KEY_SESSION);
+        if (rawSession) {
+          try { currentSession = JSON.parse(rawSession); } catch(e) { currentSession = null; }
+        }
+      }
+
+      function saveStudents() {
+        SafeStorage.setItem(KEY_STUDENTS, JSON.stringify(students));
+      }
+
+      function saveLeaves() {
+        SafeStorage.setItem(KEY_LEAVES, JSON.stringify(leaves));
+      }
+
+      function saveSession(sessionObj) {
+        currentSession = sessionObj;
+        if (sessionObj) {
+          SafeStorage.setItem(KEY_SESSION, JSON.stringify(sessionObj));
+        } else {
+          SafeStorage.removeItem(KEY_SESSION);
+        }
+      }
+
+      function showToast(msg) {
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toast-msg');
+        toastMsg.innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3200);
+      }
+
+      function formatReadableDateTime(isoString) {
+        if (!isoString) return '--';
+        try {
+          const d = new Date(isoString);
+          return d.toLocaleDateString('en-IN', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          });
+        } catch(e) {
+          return isoString;
+        }
+      }
+
+      // Format default local datetime for inputs
+      function setDefaultDateInputs() {
+        const now = new Date();
+        const fromDate = new Date(now.getTime() + 30 * 60000); // 30 min from now
+        const toDate = new Date(now.getTime() + 4 * 3600000); // 4 hours later
+
+        const formatIso = (dt) => {
+          const tzOffset = dt.getTimezoneOffset() * 60000;
+          return new Date(dt.getTime() - tzOffset).toISOString().slice(0, 16);
+        };
+
+        const fromInput = document.getElementById('leave-from');
+        const toInput = document.getElementById('leave-to');
+        if (fromInput && !fromInput.value) fromInput.value = formatIso(fromDate);
+        if (toInput && !toInput.value) toInput.value = formatIso(toDate);
+      }
+
+      return {
+        init: function() {
+          initData();
+          setDefaultDateInputs();
+
+          // Auto-resume state or default to Home
+          if (currentSession && currentSession.role === 'student') {
+            App.navigate('student');
+          } else if (currentSession && currentSession.role === 'warden') {
+            App.navigate('warden');
+          } else {
+            App.navigate('home');
+          }
+        },
+
+        navigate: function(viewId) {
+          // If accessing student and not logged in, redirect to auth tab student
+          if (viewId === 'student' && (!currentSession || currentSession.role !== 'student')) {
+            App.showAuth('student-login');
+            return;
+          }
+
+          // If accessing warden and not logged in, redirect to auth tab warden
+          if (viewId === 'warden' && (!currentSession || currentSession.role !== 'warden')) {
+            App.showAuth('warden');
+            return;
+          }
+
+          // Set nav tabs
+          document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+          const currentTabBtn = document.getElementById('tab-' + viewId);
+          if (currentTabBtn) currentTabBtn.classList.add('active');
+
+          // Show targeted section
+          document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+          const targetSection = document.getElementById('view-' + viewId);
+          if (targetSection) targetSection.classList.add('active');
+
+          // Trigger view renderers
+          if (viewId === 'student') {
+            App.renderStudentDashboard();
+          } else if (viewId === 'warden') {
+            App.renderWardenDesk();
+          }
+
+          window.scrollTo(0, 0);
+        },
+
+        showAuth: function(subTab) {
+          document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+          document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+          
+          document.getElementById('view-auth').classList.add('active');
+          App.switchAuthTab(subTab);
+        },
+
+        switchAuthTab: function(tabName) {
+          document.getElementById('auth-sub-student-login').classList.remove('active');
+          document.getElementById('auth-sub-student-reg').classList.remove('active');
+          document.getElementById('auth-sub-warden').classList.remove('active');
+
+          document.getElementById('form-student-login').style.display = 'none';
+          document.getElementById('form-student-reg').style.display = 'none';
+          document.getElementById('form-warden-login').style.display = 'none';
+
+          if (tabName === 'student-login') {
+            document.getElementById('auth-sub-student-login').classList.add('active');
+            document.getElementById('form-student-login').style.display = 'block';
+          } else if (tabName === 'student-reg') {
+            document.getElementById('auth-sub-student-reg').classList.add('active');
+            document.getElementById('form-student-reg').style.display = 'block';
+          } else if (tabName === 'warden') {
+            document.getElementById('auth-sub-warden').classList.add('active');
+            document.getElementById('form-warden-login').style.display = 'block';
+          }
+        },
+
+        handleStudentRegister: function(e) {
+          e.preventDefault();
+          const roll = document.getElementById('reg-roll').value.trim().toUpperCase();
+          
+          // Check roll unique
+          const exists = students.find(s => s.roll.toUpperCase() === roll);
+          if (exists) {
+            showToast('Roll number already registered! Please sign in.');
+            App.switchAuthTab('student-login');
+            return;
+          }
+
+          const newStudent = {
+            id: 'STU-' + (1000 + students.length + 1),
+            name: document.getElementById('reg-name').value.trim(),
+            branch: document.getElementById('reg-branch').value,
+            sem: document.getElementById('reg-sem').value,
+            roll: roll,
+            regNo: document.getElementById('reg-regno').value.trim(),
+            room: document.getElementById('reg-room').value.trim().toUpperCase(),
+            smobile: document.getElementById('reg-smobile').value.trim(),
+            pmobile: document.getElementById('reg-pmobile').value.trim(),
+            pass: document.getElementById('reg-pass').value
+          };
+
+          students.push(newStudent);
+          saveStudents();
+
+          // Auto-login
+          saveSession({ role: 'student', user: newStudent });
+          showToast('Account registered successfully! Welcome.');
+          App.navigate('student');
+        },
+
+        handleStudentLogin: function(e) {
+          e.preventDefault();
+          const roll = document.getElementById('login-roll').value.trim().toUpperCase();
+          const pass = document.getElementById('login-pass').value;
+
+          const student = students.find(s => s.roll.toUpperCase() === roll && s.pass === pass);
+          if (student) {
+            saveSession({ role: 'student', user: student });
+            showToast('Welcome back, ' + student.name);
+            App.navigate('student');
+          } else {
+            showToast('Invalid Roll Number or Password!');
+          }
+        },
+
+        handleWardenLogin: function(e) {
+          e.preventDefault();
+          const user = document.getElementById('warden-user').value.trim();
+          const pass = document.getElementById('warden-pass').value.trim();
+
+          if (user === 'warden' && pass === 'admin123') {
+            saveSession({ role: 'warden', user: { name: 'Hostel Chief Warden', user: 'warden' } });
+            showToast('Warden Console Access Granted.');
+            App.navigate('warden');
+          } else {
+            showToast('Invalid Warden Credentials! (warden / admin123)');
+          }
+        },
+
+        logout: function() {
+          saveSession(null);
+          showToast('Logged out successfully.');
+          App.navigate('home');
+        },
+
+        renderStudentDashboard: function() {
+          if (!currentSession || currentSession.role !== 'student') return;
+          const stu = currentSession.user;
+
+          document.getElementById('stu-name').innerText = stu.name;
+          document.getElementById('stu-roll').innerText = stu.roll;
+          document.getElementById('stu-room').innerText = stu.room;
+          document.getElementById('stu-branch').innerText = stu.branch;
+          document.getElementById('stu-sem').innerText = stu.sem;
+          document.getElementById('stu-avatar').innerText = stu.name.charAt(0).toUpperCase();
+
+          // Render History
+          const container = document.getElementById('student-leaves-list');
+          const myLeaves = leaves.filter(l => l.roll.toUpperCase() === stu.roll.toUpperCase());
+
+          if (myLeaves.length === 0) {
+            container.innerHTML = `
+              <div style="text-align: center; padding: 24px 10px; color: var(--text-muted); font-size: 0.85rem;">
+                No leave records found. Apply above to obtain outpass.
+              </div>
+            `;
+            return;
+          }
+
+          // Sort latest first
+          myLeaves.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+          let html = '';
+          myLeaves.forEach(item => {
+            let badgeClass = 'badge-pending';
+            if (item.status === 'Approved') badgeClass = 'badge-approved';
+            if (item.status === 'Rejected') badgeClass = 'badge-rejected';
+
+            let gatePassBtn = '';
+            if (item.status === 'Approved') {
+              gatePassBtn = `
+                <button class="btn btn-success btn-sm" onclick="App.openGatePass('${item.id}')" style="margin-top: 8px; width: 100%;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                  View Digital Gate Pass
+                </button>
+              `;
+            }
+
+            html += `
+              <div class="leave-item-card">
+                <div class="leave-header">
+                  <span class="leave-type-tag">${item.type}</span>
+                  <span class="badge ${badgeClass}">${item.status}</span>
+                </div>
+                <div class="leave-dates">
+                  <div><strong>Out:</strong> ${formatReadableDateTime(item.from)}</div>
+                  <div><strong>Return:</strong> ${formatReadableDateTime(item.to)}</div>
+                  <div style="margin-top: 4px; color: #cbd5e1;"><strong>Destination:</strong> ${item.dest}</div>
+                  <div style="color: #94a3b8; font-size: 0.76rem; margin-top: 2px;">"${item.reason}"</div>
+                </div>
+                ${item.remarks ? `<div style="font-size: 0.74rem; color: var(--accent-amber); background: rgba(245, 158, 11, 0.08); padding: 6px 8px; border-radius: 6px; margin-top: 6px;"><strong>Warden Remark:</strong> ${item.remarks}</div>` : ''}
+                ${gatePassBtn}
+                <div class="leave-meta-line">
+                  <span>Pass ID: <strong>${item.id}</strong></span>
+                  <span>Applied: ${new Date(item.createdAt).toLocaleDateString()}</span>
+                </div>
+              </div>
+            `;
+          });
+
+          container.innerHTML = html;
+        },
+
+        handleLeaveTypeChange: function() {
+          const type = document.getElementById('leave-type').value;
+          const fromInput = document.getElementById('leave-from');
+          const toInput = document.getElementById('leave-to');
+          const now = new Date();
+
+          if (type === 'Day Outpass') {
+            const fromDate = new Date(now.getTime() + 15 * 60000);
+            const toDate = new Date(now.getTime() + 4 * 3600000); // 4 hours limit
+            fromInput.value = fromDate.toISOString().slice(0, 16);
+            toInput.value = toDate.toISOString().slice(0, 16);
+          }
+        },
+
+        handleLeaveApply: function(e) {
+          e.preventDefault();
+          if (!currentSession || currentSession.role !== 'student') return;
+          const stu = currentSession.user;
+
+          const leaveFrom = document.getElementById('leave-from').value;
+          const leaveTo = document.getElementById('leave-to').value;
+
+          if (new Date(leaveTo) <= new Date(leaveFrom)) {
+            showToast('Return time must be after leaving time!');
+            return;
+          }
+
+          const newLeave = {
+            id: 'GWP-' + Math.floor(1000 + Math.random() * 9000),
+            studentId: stu.id,
+            studentName: stu.name,
+            roll: stu.roll,
+            branch: stu.branch,
+            room: stu.room,
+            pmobile: stu.pmobile,
+            type: document.getElementById('leave-type').value,
+            from: leaveFrom,
+            to: leaveTo,
+            dest: document.getElementById('leave-dest').value.trim(),
+            reason: document.getElementById('leave-reason').value.trim(),
+            status: 'Pending',
+            remarks: '',
+            createdAt: new Date().toISOString()
+          };
+
+          leaves.unshift(newLeave);
+          saveLeaves();
+          showToast('Leave request submitted successfully for Warden review!');
+
+          document.getElementById('leave-dest').value = '';
+          document.getElementById('leave-reason').value = '';
+          document.getElementById('leave-consent').checked = false;
+
+          App.renderStudentDashboard();
+        },
+
+        renderWardenDesk: function() {
+          // Calculate Metrics
+          const totalStudents = students.length;
+          const pendingCount = leaves.filter(l => l.status === 'Pending').length;
+          const approvedCount = leaves.filter(l => l.status === 'Approved').length;
+          const rejectedCount = leaves.filter(l => l.status === 'Rejected').length;
+
+          document.getElementById('metric-total-students').innerText = totalStudents;
+          document.getElementById('metric-pending').innerText = pendingCount;
+          document.getElementById('metric-approved').innerText = approvedCount;
+          document.getElementById('metric-rejected').innerText = rejectedCount;
+
+          // Filters
+          const searchVal = (document.getElementById('warden-search').value || '').toLowerCase().trim();
+          const filterBranch = document.getElementById('warden-filter-branch').value;
+          const filterStatus = document.getElementById('warden-filter-status').value;
+
+          const filtered = leaves.filter(item => {
+            const matchesSearch = item.studentName.toLowerCase().includes(searchVal) || item.roll.toLowerCase().includes(searchVal);
+            const matchesBranch = (filterBranch === 'ALL') || (item.branch === filterBranch);
+            const matchesStatus = (filterStatus === 'ALL') || (item.status === filterStatus);
+            return matchesSearch && matchesBranch && matchesStatus;
+          });
+
+          // Sort Pending first, then by date
+          filtered.sort((a, b) => {
+            if (a.status === 'Pending' && b.status !== 'Pending') return -1;
+            if (a.status !== 'Pending' && b.status === 'Pending') return 1;
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          });
+
+          const container = document.getElementById('warden-requests-list');
+          if (filtered.length === 0) {
+            container.innerHTML = `
+              <div class="glass-card" style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 26px;">
+                No leave applications matching the filters.
+              </div>
+            `;
+            return;
+          }
+
+          let html = '';
+          filtered.forEach(item => {
+            let badgeClass = 'badge-pending';
+            if (item.status === 'Approved') badgeClass = 'badge-approved';
+            if (item.status === 'Rejected') badgeClass = 'badge-rejected';
+
+            let actionButtons = '';
+            if (item.status === 'Pending') {
+              actionButtons = `
+                <div style="display: flex; gap: 8px; margin-top: 10px;">
+                  <button class="btn btn-success btn-sm" onclick="App.openWardenAction('${item.id}', 'Approve')" style="flex:1;">
+                    ✓ Approve
+                  </button>
+                  <button class="btn btn-danger btn-sm" onclick="App.openWardenAction('${item.id}', 'Reject')" style="flex:1;">
+                    ✕ Reject
+                  </button>
+                </div>
+              `;
+            }
+
+            html += `
+              <div class="glass-card" style="padding: 14px; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                  <div>
+                    <h4 style="font-size: 0.96rem; font-weight: 700; color: #fff;">${item.studentName}</h4>
+                    <div style="font-size: 0.74rem; color: var(--accent-cyan); font-weight: 600;">
+                      ${item.roll} | ${item.branch} | Room: ${item.room}
+                    </div>
+                  </div>
+                  <span class="badge ${badgeClass}">${item.status}</span>
+                </div>
+
+                <div style="margin: 10px 0; font-size: 0.78rem; line-height: 1.5; color: #cbd5e1;">
+                  <div><strong>Type:</strong> ${item.type}</div>
+                  <div><strong>Out:</strong> ${formatReadableDateTime(item.from)}</div>
+                  <div><strong>Return:</strong> ${formatReadableDateTime(item.to)}</div>
+                  <div><strong>Destination:</strong> ${item.dest}</div>
+                  <div style="margin-top: 4px; color: #e2e8f0; background: rgba(0,0,0,0.25); padding: 6px 8px; border-radius: 6px;">
+                    "${item.reason}"
+                  </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                  <a href="tel:${item.pmobile}" class="tel-link">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    Call Parent (${item.pmobile})
+                  </a>
+                  <span style="font-size: 0.7rem; color: #94a3b8;">Ref: ${item.id}</span>
+                </div>
+
+                ${item.remarks ? `<div style="font-size: 0.74rem; color: #e2e8f0; background: rgba(255,255,255,0.06); padding: 6px 8px; border-radius: 6px; margin-top: 8px;"><strong>Warden Note:</strong> ${item.remarks}</div>` : ''}
+
+                ${actionButtons}
+              </div>
+            `;
+          });
+
+          container.innerHTML = html;
+        },
+
+        openWardenAction: function(leaveId, actionType) {
+          activeWardenAction = { leaveId, type: actionType };
+          const title = document.getElementById('warden-action-title');
+          const label = document.getElementById('warden-action-label');
+          const btn = document.getElementById('warden-action-confirm-btn');
+          const textarea = document.getElementById('warden-action-remarks');
+
+          textarea.value = '';
+
+          if (actionType === 'Approve') {
+            title.innerText = 'Approve Outpass Request';
+            label.innerText = 'Special Instructions / Remarks (Optional)';
+            textarea.placeholder = 'e.g. Permission granted. Must return before 06:45 PM.';
+            btn.className = 'btn btn-success';
+            btn.innerText = 'Confirm Approval';
+          } else {
+            title.innerText = 'Reject Outpass Request';
+            label.innerText = 'Reason for Rejection (Required)';
+            textarea.placeholder = 'e.g. Inadequate parent consent / Examination schedule.';
+            btn.className = 'btn btn-danger';
+            btn.innerText = 'Confirm Rejection';
+          }
+
+          btn.onclick = App.submitWardenAction;
+          document.getElementById('modal-warden-action').classList.add('active');
+        },
+
+        closeActionModal: function() {
+          document.getElementById('modal-warden-action').classList.remove('active');
+          activeWardenAction = null;
+        },
+
+        submitWardenAction: function() {
+          if (!activeWardenAction) return;
+          const remarks = document.getElementById('warden-action-remarks').value.trim();
+
+          if (activeWardenAction.type === 'Reject' && !remarks) {
+            showToast('Please state the rejection reason for student notification.');
+            return;
+          }
+
+          const itemIndex = leaves.findIndex(l => l.id === activeWardenAction.leaveId);
+          if (itemIndex !== -1) {
+            leaves[itemIndex].status = activeWardenAction.type === 'Approve' ? 'Approved' : 'Rejected';
+            leaves[itemIndex].remarks = remarks;
+            saveLeaves();
+            showToast(`Leave request ${leaves[itemIndex].id} has been ${leaves[itemIndex].status}.`);
+          }
+
+          App.closeActionModal();
+          App.renderWardenDesk();
+        },
+
+        openGatePass: function(leaveId) {
+          const item = leaves.find(l => l.id === leaveId);
+          if (!item) return;
+
+          document.getElementById('pass-id').innerText = item.id;
+          document.getElementById('pass-student-name').innerText = item.studentName;
+          document.getElementById('pass-roll-room').innerText = `${item.roll} (Room: ${item.room})`;
+          document.getElementById('pass-branch').innerText = item.branch;
+          document.getElementById('pass-type').innerText = item.type;
+          document.getElementById('pass-dept').innerText = formatReadableDateTime(item.from);
+          document.getElementById('pass-return').innerText = formatReadableDateTime(item.to);
+          document.getElementById('pass-parent-mob').innerText = item.pmobile;
+
+          document.getElementById('modal-gate-pass').classList.add('active');
+        },
+
+        closePassModal: function() {
+          document.getElementById('modal-gate-pass').classList.remove('active');
+        }
+      };
+    })();
+
+    // Initialize application on DOM readiness
+    document.addEventListener('DOMContentLoaded', function() {
+      App.init();
+    });
+  </script>
+</body>
+</html>
